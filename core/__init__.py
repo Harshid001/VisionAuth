@@ -12,3 +12,8 @@ from .tracker            import STrack, ByteTracker, select_primary_face
 
 # Feature 4
 from .aligner            import FaceAligner, LandmarkBasedAligner, LandmarkFreeAligner, ARC_FACE_TEMPLATE, crop_and_resize_fallback
+
+# Feature 5
+from .feature_rgb        import RGBFeatureExtractor
+from .feature_flow       import MotionEncoder, OpticalFlowExtractor
+from .feature_texture    import TextureEncoder, TextureFeatureExtractor

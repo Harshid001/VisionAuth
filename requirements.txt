@@ -17,9 +17,8 @@ ultralytics>=8.2.0           # YOLOv11 backend
 # lap>=0.4.0                 # Linear assignment for ByteTrack
 
 # Feature 5 — Optical Flow
-# torch>=2.3.0
-# torchvision>=0.18.0
-# scikit-image>=0.23.0       # LBP texture features
+torch>=2.3.0
+torchvision>=0.18.0
 
 # Feature 8 — Face Verification
 # faiss-cpu>=1.8.0           # Vector similarity search
