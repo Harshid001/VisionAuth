@@ -17,3 +17,6 @@ from .aligner            import FaceAligner, LandmarkBasedAligner, LandmarkFreeA
 from .feature_rgb        import RGBFeatureExtractor
 from .feature_flow       import MotionEncoder, OpticalFlowExtractor
 from .feature_texture    import TextureEncoder, TextureFeatureExtractor
+
+# Feature 6
+from .fusion             import PositionalEncoding, TemporalMultiModalFusionTransformer
