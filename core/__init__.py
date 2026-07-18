@@ -20,3 +20,6 @@ from .feature_texture    import TextureEncoder, TextureFeatureExtractor
 
 # Feature 6
 from .fusion             import PositionalEncoding, TemporalMultiModalFusionTransformer
+
+# Feature 7
+from .liveness           import LivenessHead, LivenessHeuristics, LivenessEvaluator
