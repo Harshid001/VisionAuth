@@ -23,3 +23,6 @@ from .fusion             import PositionalEncoding, TemporalMultiModalFusionTran
 
 # Feature 7
 from .liveness           import LivenessHead, LivenessHeuristics, LivenessEvaluator
+
+# Feature 8
+from .verifier           import ArcFaceVerifier
