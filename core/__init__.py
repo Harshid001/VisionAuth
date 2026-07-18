@@ -9,3 +9,6 @@ from .detection_pipeline import DetectionPipeline, draw_detections
 
 # Feature 3
 from .tracker            import STrack, ByteTracker, select_primary_face
+
+# Feature 4
+from .aligner            import FaceAligner, LandmarkBasedAligner, LandmarkFreeAligner, ARC_FACE_TEMPLATE, crop_and_resize_fallback
