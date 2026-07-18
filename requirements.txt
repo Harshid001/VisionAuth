@@ -1,0 +1,33 @@
+# ==============================================================
+# Vision-Auth — requirements.txt
+# ==============================================================
+# Feature 1 — Video Capture & Stream Management
+opencv-python>=4.9.0
+numpy>=1.26.0
+
+# Testing
+pytest>=8.0.0
+
+# Future features (uncomment as each feature is built)
+# ----------------------------------------------------------
+# Feature 2 — Face Detection
+# insightface>=0.7.3         # RetinaFace
+# ultralytics>=8.2.0         # YOLOv11
+# onnxruntime-gpu>=1.18.0    # ONNX runtime (GPU); use onnxruntime for CPU
+
+# Feature 3 — Face Tracking
+# lap>=0.4.0                 # Linear assignment for ByteTrack
+
+# Feature 5 — Optical Flow
+# torch>=2.3.0
+# torchvision>=0.18.0
+# scikit-image>=0.23.0       # LBP texture features
+
+# Feature 8 — Face Verification
+# faiss-cpu>=1.8.0           # Vector similarity search
+
+# API
+# fastapi>=0.111.0
+# uvicorn[standard]>=0.30.0
+# pydantic>=2.7.0
+# python-jose[cryptography]>=3.3.0   # JWT tokens
