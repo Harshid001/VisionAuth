@@ -126,6 +126,17 @@ Fully Passive, Frictionless Authentication
 
 ---
 
+## 🚀 Recent Updates (ICETAI-2026 Preparation)
+
+- **Dynamic Google Auth Configuration**: Frontend now securely fetches `GOOGLE_CLIENT_ID` via the `/api/config` backend endpoint rather than hardcoding it, enabling seamless environment variable updates on cloud platforms.
+- **Render Memory Optimization (Demo Mode)**: Added a robust `RENDER_DEMO_MODE` environment variable switch. When running on Render's restricted 512MB RAM Free Tier, this mode safely bypasses heavy PyTorch/InsightFace models by seamlessly falling back to a lightweight OpenCV Haar Cascade flow. This allows perfect presentation-ready UI demonstrations without server OOM (Out-of-Memory) crashes.
+- **Resilient Error Handling**: Fortified the FastAPI backend signup endpoints with secure JSON error parsers to expose exact underlying errors to the frontend, preventing silent crashes when cloud resources limit execution.
+- **Local Windows Isolation**: Improved deployment instructions and `requirements.txt` stability for running the server on native Windows (via Python 3.11 conda environments) to bypass `MinGW/Numpy 2.0` experimental build compatibility issues.
+
+<br/>
+
+---
+
 ## 🧭 Project Overview
 
 **VisionAuth** is a research-grade, production-ready deep learning framework for **passive human authentication**, designed to replace traditional CAPTCHA challenges with a **silent, temporal, multi-modal face verification pipeline**. Rather than asking users to solve puzzles, click checkboxes, or transcribe distorted text, VisionAuth verifies human presence and identity by analyzing:
