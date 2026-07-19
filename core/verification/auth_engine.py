@@ -16,6 +16,7 @@ Decision flow
 from __future__ import annotations
 
 import logging
+import threading
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -127,13 +128,21 @@ class AuthDecisionEngine:
         )
         logger.info(reason)
 
-        audit_id = self.audit.log(
-            username_claimed=username_claimed,
-            decision="GRANTED",
-            deny_reason="",
-            liveness_score=liveness_score,
-            identity_score=identity_score,
-        )
+        # Dispatch audit logging to a background thread to prevent latency blocks
+        threading.Thread(
+            target=self.audit.log,
+            kwargs={
+                "username_claimed": username_claimed,
+                "decision": "GRANTED",
+                "deny_reason": "",
+                "liveness_score": liveness_score,
+                "identity_score": identity_score,
+            },
+            daemon=True
+        ).start()
+        
+        # audit_id is technically not available synchronously anymore
+        audit_id = -1
 
         return AuthResult(
             granted=True,
@@ -163,13 +172,20 @@ class AuthDecisionEngine:
         )
         logger.warning("Auth DENIED — %s", reason)
 
-        audit_id = self.audit.log(
-            username_claimed=username_claimed,
-            decision="DENIED",
-            deny_reason=reason,
-            liveness_score=liveness_score,
-            identity_score=identity_score,
-        )
+        # Dispatch audit logging to a background thread
+        threading.Thread(
+            target=self.audit.log,
+            kwargs={
+                "username_claimed": username_claimed,
+                "decision": "DENIED",
+                "deny_reason": reason,
+                "liveness_score": liveness_score,
+                "identity_score": identity_score,
+            },
+            daemon=True
+        ).start()
+        
+        audit_id = -1
 
         return AuthResult(
             granted=False,

@@ -108,7 +108,7 @@ class OpticalFlowExtractor:
         Convert numpy optical flow (H, W, 2) to PyTorch tensor (1, 2, H, W) and normalize.
         """
         # Flow representation: shape (2, H, W)
-        flow_tensor = torch.from_numpy(flow.transpose(2, 0, 1)).float()
+        flow_tensor = torch.from_numpy(flow).permute(2, 0, 1).float()
         
         # Clip extreme flow values to avoid outlier gradients (e.g. -20 to 20 pixels)
         flow_tensor = torch.clamp(flow_tensor, -20.0, 20.0)
