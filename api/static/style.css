@@ -555,11 +555,33 @@ a:hover { text-decoration: underline; }
 /* ── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .splitscreen { grid-template-columns: 1fr; }
-  .hero-panel { display: none; }
-  .form-panel { min-height: calc(100vh - 56px); }
+  .hero-panel { 
+    display: flex; 
+    padding: 2.5rem 1.5rem; 
+    border-right: none; 
+    border-bottom: 1px solid var(--border); 
+  }
+  .form-panel { 
+    padding: 2.5rem 1.5rem; 
+    min-height: auto; 
+  }
   .verify-grid { grid-template-columns: 1fr; }
   .verify-footer-badges { grid-template-columns: 1fr; }
   .admin-grid { grid-template-columns: 1fr; }
+  
+  .header { 
+    flex-wrap: wrap; 
+    justify-content: space-between; 
+    padding: 0.75rem 1rem;
+  }
+  .header-nav { 
+    order: 3; 
+    width: 100%; 
+    margin-top: 0.75rem; 
+    justify-content: space-between;
+  }
+  .brand-sub { display: none; }
+  .nav-btn { flex: 1; padding: 0.45rem 0.5rem; }
 }
 
 /* Loading spinner animation on buttons */
