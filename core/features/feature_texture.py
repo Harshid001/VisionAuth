@@ -16,13 +16,22 @@ import torch.nn as nn
 class TextureEncoder(nn.Module):
     """
     Lightweight CNN to encode multi-channel texture/edge maps.
-    Input size: (Batch, 2, 112, 112) -> Output size: (Batch, embedding_dim).
+    Input size: (Batch, 3, 112, 112) BGR -> Output size: (Batch, embedding_dim).
       Channel 0: Laplacian edge map (high-frequency detail)
       Channel 1: Sobel gradient magnitude / LBP representation
     """
 
     def __init__(self, embedding_dim: int = 512) -> None:
         super().__init__()
+        
+        # Fixed weights for Sobel and Laplacian filters
+        sobel_x = torch.tensor([[-1., 0., 1.], [-2., 0., 2.], [-1., 0., 1.]]).view(1, 1, 3, 3)
+        sobel_y = torch.tensor([[-1., -2., -1.], [0., 0., 0.], [1., 2., 1.]]).view(1, 1, 3, 3)
+        laplacian = torch.tensor([[0., 1., 0.], [1., -4., 1.], [0., 1., 0.]]).view(1, 1, 3, 3)
+        
+        self.register_buffer('sobel_x', sobel_x)
+        self.register_buffer('sobel_y', sobel_y)
+        self.register_buffer('laplacian', laplacian)
         
         self.conv = nn.Sequential(
             nn.Conv2d(2, 16, kernel_size=3, stride=2, padding=1),  # -> 16x56x56
@@ -52,7 +61,30 @@ class TextureEncoder(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        features = self.conv(x)
+        """
+        x: BGR face crop tensor of shape (Batch, 3, Height, Width), normalized to [0, 1]
+        """
+        # Convert BGR to Grayscale
+        gray = 0.114 * x[:, 0:1, :, :] + 0.587 * x[:, 1:2, :, :] + 0.299 * x[:, 2:3, :, :]
+        
+        # Apply Laplacian
+        lap = nn.functional.conv2d(gray, self.laplacian, padding=1)
+        lap = torch.abs(lap)
+        
+        # Apply Sobel
+        sx = nn.functional.conv2d(gray, self.sobel_x, padding=1)
+        sy = nn.functional.conv2d(gray, self.sobel_y, padding=1)
+        sob = torch.sqrt(sx**2 + sy**2 + 1e-6)
+        
+        # Normalize to [0, 1]
+        lap_max = lap.view(lap.size(0), -1).max(dim=1)[0].view(-1, 1, 1, 1) + 1e-6
+        lap = lap / lap_max
+        sob_max = sob.view(sob.size(0), -1).max(dim=1)[0].view(-1, 1, 1, 1) + 1e-6
+        sob = sob / sob_max
+        
+        texture_maps = torch.cat([lap, sob], dim=1) # (B, 2, H, W)
+        
+        features = self.conv(texture_maps)
         embeddings = self.fc(features)
         # L2 normalize texture embeddings
         return nn.functional.normalize(embeddings, p=2, dim=1)
@@ -66,45 +98,14 @@ class TextureFeatureExtractor:
     @staticmethod
     def extract_texture_maps(img: np.ndarray) -> np.ndarray:
         """
-        Extracts high-frequency Laplacian edge maps and Sobel gradient magnitude maps.
-
-        Parameters
-        ----------
-        img : Aligned BGR face crop.
-
-        Returns
-        -------
-        Float32 array of shape (H, W, 2) where:
-          Channel 0: Laplacian edge map (normalized)
-          Channel 1: Sobel gradient magnitude (normalized)
+        Returns the BGR image as is, since texture map extraction is now
+        performed directly in the TextureEncoder on the GPU.
         """
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
-        # 1. Laplacian Edge Detection
-        laplacian = cv2.Laplacian(gray, cv2.CV_32F, ksize=3)
-        # Take absolute value to represent edge intensity
-        laplacian = np.abs(laplacian)
-        
-        # 2. Sobel Gradient Magnitude
-        sobelx = cv2.Sobel(gray, cv2.CV_32F, 1, 0, ksize=3)
-        sobely = cv2.Sobel(gray, cv2.CV_32F, 0, 1, ksize=3)
-        sobel = np.sqrt(sobelx**2 + sobely**2)
-
-        # Normalize both maps to range [0, 1.0]
-        max_lap = np.max(laplacian)
-        if max_lap > 0:
-            laplacian /= max_lap
-            
-        max_sob = np.max(sobel)
-        if max_sob > 0:
-            sobel /= max_sob
-
-        # Combine into 2-channel map (H, W, 2)
-        texture_map = np.stack([laplacian, sobel], axis=-1)
-        return texture_map
+        return img
 
     @staticmethod
     def preprocess_texture(texture_map: np.ndarray) -> torch.Tensor:
-        """Convert numpy texture map (H, W, 2) to PyTorch tensor (1, 2, H, W)."""
-        tensor = torch.from_numpy(texture_map.transpose(2, 0, 1)).float()
+        """Convert numpy BGR image (H, W, 3) to PyTorch tensor (1, 3, H, W)."""
+        tensor = torch.from_numpy(texture_map.transpose(2, 0, 1)).float() / 255.0
         return tensor.unsqueeze(0)
+

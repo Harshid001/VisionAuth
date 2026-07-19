@@ -99,18 +99,13 @@ class TemporalMultiModalFusionTransformer(nn.Module):
         """
         batch_size, seq_len, _ = rgb.shape
 
-        # 1. Reshape and concatenate modalities per frame
-        # Combined shape: (Batch * SeqLen, feature_dim * 3)
-        rgb_flat = rgb.contiguous().view(-1, rgb.size(-1))
-        flow_flat = flow.contiguous().view(-1, flow.size(-1))
-        tex_flat = texture.contiguous().view(-1, texture.size(-1))
-        
-        concat_feats = torch.cat([rgb_flat, flow_flat, tex_flat], dim=-1)
+        # 1. Concatenate modalities per frame
+        # Combined shape: (Batch, SeqLen, feature_dim * 3)
+        concat_feats = torch.cat([rgb, flow, texture], dim=-1)
 
         # 2. Project to shared embedding space (d_model)
         # Projected shape: (Batch, SeqLen, d_model)
         fused_frames = self.modality_fusion(concat_feats)
-        fused_frames = fused_frames.view(batch_size, seq_len, -1)
 
         # 3. Prepend the [CLS] token
         # cls_tokens shape: (Batch, 1, d_model)
