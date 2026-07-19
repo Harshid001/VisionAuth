@@ -229,26 +229,32 @@ async def portal_signup(
     password: str      = Form(""),
     image:    UploadFile = File(...),
 ):
-    email = email.lower().strip()
+    try:
+        email = email.lower().strip()
 
-    if get_db().get_portal_user(email) is not None:
-        raise HTTPException(status_code=409, detail="An account with this email already exists.")
+        if get_db().get_portal_user(email) is not None:
+            raise HTTPException(status_code=409, detail="An account with this email already exists.")
 
-    data = await image.read()
-    img  = _decode_image(data)
+        data = await image.read()
+        img  = _decode_image(data)
 
-    # Enroll face in the biometric DB under the username
-    verifier = get_verifier()
-    success, msg = verifier.enroll_user(username=username, frame=img)
-    if not success:
-        raise HTTPException(status_code=400, detail=f"Face enrollment failed: {msg}")
+        # Enroll face in the biometric DB under the username
+        verifier = get_verifier()
+        success, msg = verifier.enroll_user(username=username, frame=img)
+        if not success:
+            raise HTTPException(status_code=400, detail=f"Face enrollment failed: {msg}")
 
-    # Store credentials persistently in SQLite
-    pw_hash = _hash_pw(password) if password else "*google_auth*"
-    get_db().register_portal_user(email, username, pw_hash)
+        # Store credentials persistently in SQLite
+        pw_hash = _hash_pw(password) if password else "*google_auth*"
+        get_db().register_portal_user(email, username, pw_hash)
 
-    logger.info("Portal signup: user=%s email=%s", username, email)
-    return {"message": f"Account created successfully! Welcome, {username}."}
+        logger.info("Portal signup: user=%s email=%s", username, email)
+        return {"message": f"Account created successfully! Welcome, {username}."}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Internal error during signup: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 
 # ── Config Endpoint ───────────────────────────────────────────────────────────

@@ -392,7 +392,13 @@ document.addEventListener("DOMContentLoaded", () => {
     setLoading(signupBtn, true);
     try {
       const res = await fetch("/api/portal/signup", { method: "POST", body: fd });
-      const data = await res.json();
+      let data;
+      const text = await res.text();
+      try {
+        data = JSON.parse(text);
+      } catch(e) {
+        throw new Error(`Server returned non-JSON response (${res.status}): ${text.substring(0, 50)}`);
+      }
       if (!res.ok) throw new Error(data.detail || "Signup failed.");
       showMsg(signupMsg, `✅ ${data.message} Redirecting to login…`, "success");
       setTimeout(() => showGate("login"), 2200);
