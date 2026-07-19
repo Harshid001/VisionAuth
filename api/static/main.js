@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ══════════════════════════════════════════════════════════════════
   // GOOGLE AUTHENTICATION
   // ══════════════════════════════════════════════════════════════════
-  const GOOGLE_CLIENT_ID = "693082066635-lvuqu0vm8fe53dg9i21qao9uae3q480k.apps.googleusercontent.com";
+  let GOOGLE_CLIENT_ID = "";
 
   function parseJwt(token) {
     try {
@@ -146,7 +146,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Initialize once GIS library is ready
-  function initGoogleAuth() {
+  async function initGoogleAuth() {
+    if (!GOOGLE_CLIENT_ID) {
+      try {
+        const res = await fetch("/api/config");
+        const data = await res.json();
+        GOOGLE_CLIENT_ID = data.google_client_id;
+      } catch (e) {
+        console.error("Failed to load config:", e);
+      }
+    }
+
+    if (!GOOGLE_CLIENT_ID) {
+      console.warn("GOOGLE_CLIENT_ID is not configured. Google Login will be disabled.");
+      return;
+    }
+
     if (window.google && google.accounts) {
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,

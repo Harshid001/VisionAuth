@@ -251,6 +251,13 @@ async def portal_signup(
     return {"message": f"Account created successfully! Welcome, {username}."}
 
 
+# ── Config Endpoint ───────────────────────────────────────────────────────────
+@app.get("/api/config")
+async def api_config():
+    return {
+        "google_client_id": os.environ.get("GOOGLE_CLIENT_ID", "")
+    }
+
 # ── Portal: Step 1 — Verify email + password ──────────────────────────────────
 @app.post("/api/portal/login/password")
 async def portal_login_password(
