@@ -254,8 +254,10 @@ async def portal_signup(
 # ── Config Endpoint ───────────────────────────────────────────────────────────
 @app.get("/api/config")
 async def api_config():
+    # Fallback to the known Client ID if the Render environment variable is missing
+    client_id = os.environ.get("GOOGLE_CLIENT_ID") or "693082066635-lvuqu0vm8fe53dg9i21qao9uae3q480k.apps.googleusercontent.com"
     return {
-        "google_client_id": os.environ.get("GOOGLE_CLIENT_ID", "")
+        "google_client_id": client_id
     }
 
 # ── Portal: Step 1 — Verify email + password ──────────────────────────────────
@@ -278,7 +280,7 @@ async def portal_login_password(
 async def portal_login_google(
     credential: str = Form(...),
 ):
-    google_client_id = os.environ.get("GOOGLE_CLIENT_ID")
+    google_client_id = os.environ.get("GOOGLE_CLIENT_ID") or "693082066635-lvuqu0vm8fe53dg9i21qao9uae3q480k.apps.googleusercontent.com"
     if not google_client_id:
         raise HTTPException(status_code=500, detail="Google Client ID not configured on server.")
 
