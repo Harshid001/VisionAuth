@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Initialize once GIS library is ready
-  window.onload = () => {
+  function initGoogleAuth() {
     if (window.google && google.accounts) {
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
@@ -164,8 +164,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (signupContainer) {
         google.accounts.id.renderButton(signupContainer, { ...btnOptions, text: "signup_with" });
       }
+    } else {
+      setTimeout(initGoogleAuth, 100);
     }
-  };
+  }
+  initGoogleAuth();
 
   // ══════════════════════════════════════════════════════════════════
   // TAB SWITCHING
