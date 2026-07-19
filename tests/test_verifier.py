@@ -14,7 +14,7 @@ import numpy as np
 import pytest
 
 from db.db_manager import DatabaseManager
-from core.verifier import ArcFaceVerifier
+from core.verification.verifier import ArcFaceVerifier
 
 
 # ---------------------------------------------------------------------------

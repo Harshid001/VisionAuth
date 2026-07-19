@@ -11,9 +11,9 @@ import numpy as np
 import pytest
 import torch
 
-from core.feature_rgb import RGBFeatureExtractor
-from core.feature_flow import MotionEncoder, OpticalFlowExtractor
-from core.feature_texture import TextureEncoder, TextureFeatureExtractor
+from core.features.feature_rgb import RGBFeatureExtractor
+from core.features.feature_flow import MotionEncoder, OpticalFlowExtractor
+from core.features.feature_texture import TextureEncoder, TextureFeatureExtractor
 
 
 def _make_dummy_image(h=112, w=112) -> np.ndarray:

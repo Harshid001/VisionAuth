@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 import torch
 
-from core.liveness import LivenessHead, LivenessHeuristics, LivenessEvaluator
+from core.liveness.liveness import LivenessHead, LivenessHeuristics, LivenessEvaluator
 
 
 class TestLivenessHead:
@@ -114,3 +114,15 @@ class TestLivenessEvaluator:
         
         assert score <= 0.2
         assert "Motion Spoof" in status
+
+    def test_evaluator_video_replay_attack(self):
+        evaluator = LivenessEvaluator()
+        
+        # Test case: Adversarial video replay attack. 
+        # Texture is perfect (iPad screen), Motion is high (video playing),
+        # but the temporal neural network detects the spoof (score = 0.29).
+        # Previously, the motion variance bonus would push this over 0.5.
+        score, status = evaluator.evaluate(neural_score=0.29, texture_var=400.0, motion_var=0.05)
+        
+        assert score < 0.5
+        assert "Fake/Spoof" in status

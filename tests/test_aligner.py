@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 import cv2
 
-from core.aligner import LandmarkBasedAligner, LandmarkFreeAligner, crop_and_resize_fallback
+from core.alignment.aligner import LandmarkBasedAligner, LandmarkFreeAligner, crop_and_resize_fallback
 
 
 def _make_dummy_face_image() -> np.ndarray:

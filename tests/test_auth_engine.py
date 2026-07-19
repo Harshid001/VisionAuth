@@ -11,7 +11,7 @@ import os
 import pytest
 
 from db.audit_log import AuditLogger, AuditRecord
-from core.auth_engine import AuthDecisionEngine, AuthResult
+from core.verification.auth_engine import AuthDecisionEngine, AuthResult
 
 
 # ── AuditLogger ────────────────────────────────────────────────────────────

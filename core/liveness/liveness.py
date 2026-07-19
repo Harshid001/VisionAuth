@@ -155,10 +155,8 @@ class LivenessEvaluator:
         if motion_var < self.min_motion_var:
             return 0.05, "Motion Spoof: Face is static (potential photo attack)"
 
-        # 3. Fuse scores (neural network output + motion bonus)
-        # Give a slight bonus if motion variance shows dynamic activity
-        fused_score = self.neural_weight * neural_score + (1.0 - self.neural_weight) * min(motion_var * 100.0, 1.0)
-        fused_score = float(np.clip(fused_score, 0.0, 1.0))
+        # 3. Final score is purely the neural network confidence, since heuristics passed
+        fused_score = float(np.clip(neural_score, 0.0, 1.0))
 
-        status = "Live" if fused_score >= 0.5 else "Fake/Spoof"
+        status = "Live" if fused_score >= 0.5 else "Fake/Spoof: Neural network low confidence"
         return fused_score, status

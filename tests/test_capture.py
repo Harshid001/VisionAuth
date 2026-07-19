@@ -16,7 +16,7 @@ import threading
 import numpy as np
 import pytest
 
-from core.capture import (
+from core.capture.capture import (
     CaptureConfig,
     FramePacket,
     StreamState,

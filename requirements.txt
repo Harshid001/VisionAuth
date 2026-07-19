@@ -3,7 +3,7 @@
 # ==============================================================
 # Feature 1 — Video Capture & Stream Management
 opencv-python>=4.9.0
-numpy>=1.26.0
+numpy>=1.26.0,<2
 
 # Testing
 pytest>=8.0.0

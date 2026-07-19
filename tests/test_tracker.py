@@ -11,8 +11,8 @@ import time
 import numpy as np
 import pytest
 
-from core.detector import DetectedFace
-from core.tracker import STrack, ByteTracker, select_primary_face
+from core.detection.detector import DetectedFace
+from core.capture.tracker import STrack, ByteTracker, select_primary_face
 
 
 # Helper functions

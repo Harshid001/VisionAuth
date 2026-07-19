@@ -10,7 +10,7 @@ Run with:
 import pytest
 import torch
 
-from core.fusion import PositionalEncoding, TemporalMultiModalFusionTransformer
+from core.features.fusion import PositionalEncoding, TemporalMultiModalFusionTransformer
 
 
 class TestPositionalEncoding:
