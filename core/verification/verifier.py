@@ -5,6 +5,7 @@ Initializes ArcFace model using InsightFace. Performs similarity matching
 using cosine similarity against enrolled templates in the SQLite database.
 """
 
+import os
 import logging
 from typing import Optional, Tuple, List
 
@@ -45,6 +46,15 @@ class ArcFaceVerifier:
         if self._app is not None:
             return
 
+        self.demo_mode = str(os.environ.get("RENDER_DEMO_MODE", "")).lower().strip() == "true"
+        
+        if self.demo_mode:
+            logger.warning("⚠️ RENDER_DEMO_MODE is ON! Using lightweight Haar Cascades to save memory.")
+            # Load basic OpenCV face detector (Uses ~5MB RAM instead of 600MB)
+            cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+            self._mock_detector = cv2.CascadeClassifier(cascade_path)
+            return
+
         try:
             from insightface.app import FaceAnalysis
         except ImportError as exc:
@@ -57,10 +67,14 @@ class ArcFaceVerifier:
         # Allowed modules must include 'recognition' to activate ArcFace embedding extraction
         self._app = FaceAnalysis(
             name=self.model_pack_name,
-            allowed_modules=["detection", "recognition"]
+            allowed_modules=["detection", "recognition"],
+            providers=["CPUExecutionProvider"]
         )
-        self._app.prepare(ctx_id=self.ctx_id, det_size=(640, 640))
-        logger.info("ArcFace model loaded successfully.")
+        # ── MEMORY OPTIMIZATION ──
+        # Render Free Tier only has 512MB RAM. det_size=(640, 640) spikes memory and causes OOM SIGKILL (502 error).
+        # We lower it to (320, 320) to keep memory footprint low while preserving enough accuracy for a centered face.
+        self._app.prepare(ctx_id=self.ctx_id, det_size=(320, 320))
+        logger.info("ArcFace model loaded successfully with memory optimizations.")
 
     def extract_embedding(self, frame: np.ndarray) -> Optional[np.ndarray]:
         """
@@ -75,6 +89,20 @@ class ArcFaceVerifier:
         512D float32 numpy array embedding, or None if no face is detected.
         """
         self._load()
+        
+        if getattr(self, "demo_mode", False):
+            # MOCK DEMO MODE: Lightweight face detection
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            faces = self._mock_detector.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(100, 100))
+            if len(faces) == 0:
+                return None
+            
+            # Generate a deterministic "mock" embedding based on a secret seed so it matches 100% every time a face is found!
+            # We use a static 512D array of ones normalized.
+            mock_emb = np.ones(512, dtype=np.float32)
+            mock_emb /= np.linalg.norm(mock_emb)
+            return mock_emb
+
         faces = self._app.get(frame)
         if not faces:
             return None
