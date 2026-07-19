@@ -116,7 +116,24 @@ document.addEventListener("DOMContentLoaded", () => {
       fetch("/api/portal/login/google", { method: "POST", body: fd })
         .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
         .then(({ status, ok, data }) => {
-          if (!ok) throw new Error(data.detail || "Google Login failed.");
+          if (!ok) {
+            if (status === 404) {
+              // Auto-redirect to signup since account doesn't exist yet
+              showGate("signup");
+              const payload = parseJwt(response.credential);
+              if (payload) {
+                signupName.value = payload.name || "";
+                signupEmail.value = payload.email || "";
+                signupPw.parentElement.style.display = 'none';
+                signupConfirm.parentElement.style.display = 'none';
+                signupPw.required = false;
+                signupConfirm.required = false;
+                showMsg(signupMsg, "Account not found. We've started your registration! Please upload a Face Enrollment Photo and submit.", "info");
+              }
+              return;
+            }
+            throw new Error(data.detail || "Google Login failed.");
+          }
           loggedInEmail    = data.email;
           loggedInUsername = data.username;
           showMsg(loginMsg, `✅ ${data.message}`, "success");
